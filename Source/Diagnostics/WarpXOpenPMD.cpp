@@ -118,8 +118,12 @@ WarpXOpenPMDPlot::~WarpXOpenPMDPlot()
 {
   if( m_Series )
   {
+    { Timer t("Cleaning m_series...flush");
     m_Series->flush();
+    }
+    { Timer t("Cleaning m_series...delete");
     m_Series.reset( nullptr );
+    }
   }
 }
 
@@ -169,8 +173,9 @@ WarpXOpenPMDPlot::Init(openPMD::AccessType accessType)
 
     // close a previously open series before creating a new one
     // see ADIOS1 limitation: https://github.com/openPMD/openPMD-api/pull/686
+    { Timer t("\tSet to null series");
     m_Series = nullptr;
-
+    }
     if( amrex::ParallelDescriptor::NProcs() > 1 )
     {
         m_Series = std::make_unique<openPMD::Series>(
@@ -255,6 +260,7 @@ WarpXOpenPMDPlot::WriteOpenPMDParticles(const std::unique_ptr<MultiParticleConta
       // pc->plot_flags is 1 or 0, whether quantity is dumped or not.
 
       {
+    Timer t("\t SavePlotFile");
         //
         SavePlotFile(pc,
            species_names[i],
@@ -326,9 +332,10 @@ WarpXOpenPMDPlot::SavePlotFile (const std::unique_ptr<WarpXParticleContainer>& p
   //
   // define positions & offsets
   //
+  { Timer t("\t   SetupPosNProperties");
   SetupPos(pc, currSpecies, counter.GetTotalNumParticles());
   SetupRealProperties(currSpecies, write_real_comp, real_comp_names, counter.GetTotalNumParticles());
-
+  }
   // open files from all processors, in case some will not contribute below
   m_Series->flush();
 
@@ -685,8 +692,10 @@ WarpXOpenPMDPlot::WriteOpenPMDFields( //const std::string& filename,
                             chunk_offset, chunk_size );
     }
   }
+  { Timer t("\t\t Flush in fields.");
   // Flush data to disk after looping over all components
   m_Series->flush();
+  }
 }
 #endif // WARPX_USE_OPENPMD
 

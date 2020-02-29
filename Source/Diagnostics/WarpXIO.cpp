@@ -537,20 +537,29 @@ WarpX::WriteOpenPMDFile () const
 
 #ifdef WARPX_USE_OPENPMD
     const auto step = istep[0];
-
-    m_OpenPMDPlotWriter->SetStep(step);
+    std::string title = "..... Wrote in OpenPMD step .. "+std::to_string(step);
+    Timer thisStep(title.c_str());
 
     Vector<std::string> varnames; // Name of the written fields
     Vector<MultiFab> mf_avg; // contains the averaged, cell-centered fields
     Vector<const MultiFab*> output_mf; // will point to the data to be written
     Vector<Geometry> output_geom;
 
+    {Timer t("PrepareFields");
     prepareFields(step, varnames, mf_avg, output_mf, output_geom);
+    }
+    m_OpenPMDPlotWriter->SetStep(step);
+
+    {Timer t("WriteFields");
     // fields: only dumped for coarse level
     m_OpenPMDPlotWriter->WriteOpenPMDFields(
         varnames, *output_mf[0], output_geom[0], step, t_new[0]);
+    }
+
+    {Timer t("WriteParticles");
     // particles: all (reside only on locally finest level)
     m_OpenPMDPlotWriter->WriteOpenPMDParticles(mypc);
+    }
 #endif
 }
 
@@ -560,16 +569,17 @@ WarpX::WritePlotFile () const
     WARPX_PROFILE("WarpX::WritePlotFile()");
 
     const auto step = istep[0];
+    std::string title = "..... Wrote in PlotFile step .. "+std::to_string(step);
+    Timer thisStep(title.c_str());
     const std::string& plotfilename = amrex::Concatenate(plot_file,step);
     amrex::Print() << "  Writing plotfile " << plotfilename << "\n";
-
     Vector<std::string> varnames; // Name of the written fields
     Vector<MultiFab> mf_avg; // contains the averaged, cell-centered fields
     Vector<const MultiFab*> output_mf; // will point to the data to be written
     Vector<Geometry> output_geom;
-
+    {Timer t("PrepareFields");
     prepareFields(step, varnames, mf_avg, output_mf, output_geom);
-
+    }
     // Write the fields contained in `mf_avg`, and corresponding to the
     // names `varnames`, into a plotfile.
     // Prepare extra directory (filled later), for the raw fields

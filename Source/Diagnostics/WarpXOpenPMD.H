@@ -34,7 +34,7 @@ public:
   ~Timer() {
       m_End = amrex::second();
       amrex::ParallelDescriptor::ReduceRealMax(m_End, amrex::ParallelDescriptor::IOProcessorNumber());
-      amrex::Print()<<m_Tag<<" took:"<<m_End - m_Start<<" seconds\n";
+      amrex::Print()<<"Timer: "<<m_Tag<<" took:"<<m_End - m_Start<<" seconds\n";
   }
 private:
   amrex::Real m_Start;
