@@ -163,7 +163,7 @@ void WarpXOpenPMDPlot::SetStep(int ts)
       Init(openPMD::AccessType::CREATE);
     } else { // one file
       if (nullptr == m_Series) {
-	Init(openPMD::AccessType::CREATE);
+    Init(openPMD::AccessType::CREATE);
       }
     }
     //Init(openPMD::AccessType::CREATE);
@@ -181,8 +181,8 @@ WarpXOpenPMDPlot::Init(openPMD::AccessType accessType)
     // close a previously open series before creating a new one
     // see ADIOS1 limitation: https://github.com/openPMD/openPMD-api/pull/686
     {
-	Timer t("\tSet to null series");
-	m_Series = nullptr;      
+    Timer t("\tSet to null series");
+    m_Series = nullptr;      
     }
     if( amrex::ParallelDescriptor::NProcs() > 1 )
     {
