@@ -182,7 +182,7 @@ WarpXOpenPMDPlot::Init(openPMD::AccessType accessType)
     // see ADIOS1 limitation: https://github.com/openPMD/openPMD-api/pull/686
     {
     Timer t("\tSet to null series");
-    m_Series = nullptr;      
+    m_Series = nullptr;
     }
     if( amrex::ParallelDescriptor::NProcs() > 1 )
     {
