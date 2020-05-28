@@ -154,6 +154,8 @@ Diagnostics::InitData ()
 #else
         amrex::Abort("To use openpmd output format, need to compile with USE_OPENPMD=TRUE");
 #endif
+    } else if (m_format == "none"){
+        m_flush_format = new FlushFormatNull();
     } else {
         amrex::Abort("unknown output format");
     }
