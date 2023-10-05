@@ -28,9 +28,9 @@ public:
   bool InitLocalHandler(const std::string& prefix);
 
   void StoreMesh (const amrex::Vector<const amrex::MultiFab*> &mf,
-		  const amrex::Vector<std::string> &varnames,
-		  const amrex::Vector<amrex::Geometry> &geom,
-		  amrex::Real time);
+          const amrex::Vector<std::string> &varnames,
+          const amrex::Vector<amrex::Geometry> &geom,
+          amrex::Real time);
 
   std::unique_ptr<amrex::openpmd_api::AMReX_openPMDHandler> m_UserHandler;
 
@@ -88,32 +88,32 @@ public:
   std::unique_ptr< AMReXWithOpenPMD > m_Writer = std::make_unique< AMReXWithOpenPMD >("");
 
   void GetNames(const ParticleDiag& part_diag,
-		amrex::Vector<std::string>& real_names,
-		amrex::Vector<std::string>& int_names,
-		amrex::Vector<int>& int_flags,
-		amrex::Vector<int>& real_flags
-		) const;
+        amrex::Vector<std::string>& real_names,
+        amrex::Vector<std::string>& int_names,
+        amrex::Vector<int>& int_flags,
+        amrex::Vector<int>& real_flags
+        ) const;
 
   void DefaultWriter(const std::string& prefix,
-		     int iteration,
-		     const amrex::Vector<std::string> varnames,
-		     const amrex::Vector<amrex::MultiFab>& mf,
-		     amrex::Vector<amrex::Geometry>& geom,
-		     const double time,
-		     const amrex::Vector<ParticleDiag>& particle_diags,
-		     const bool use_pinned_pc
-		     ) const;
+             int iteration,
+             const amrex::Vector<std::string> varnames,
+             const amrex::Vector<amrex::MultiFab>& mf,
+             amrex::Vector<amrex::Geometry>& geom,
+             const double time,
+             const amrex::Vector<ParticleDiag>& particle_diags,
+             const bool use_pinned_pc
+             ) const;
   void BTDWriter(const std::string& prefix,
-		 int iteration,
-		 const amrex::Vector<std::string> varnames,
-		 const amrex::Vector<amrex::MultiFab>& mf,
-		 amrex::Vector<amrex::Geometry>& geom,
-		 const double time,
-		 const amrex::Vector<ParticleDiag>& particle_diags,
-		 const bool use_pinned_pc,
-		 bool isLastBTDFlush,
-		 const amrex::Vector<int>& totalParticlesFlushedAlready
-		 ) const;
+         int iteration,
+         const amrex::Vector<std::string> varnames,
+         const amrex::Vector<amrex::MultiFab>& mf,
+         amrex::Vector<amrex::Geometry>& geom,
+         const double time,
+         const amrex::Vector<ParticleDiag>& particle_diags,
+         const bool use_pinned_pc,
+         bool isLastBTDFlush,
+         const amrex::Vector<int>& totalParticlesFlushedAlready
+         ) const;
 
 };
 

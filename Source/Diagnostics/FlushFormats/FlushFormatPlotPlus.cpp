@@ -80,17 +80,22 @@ FlushFormatPlotPlus::WriteToFile (
     const amrex::Vector<amrex::MultiFab>& mf,
     amrex::Vector<amrex::Geometry>& geom,
     const amrex::Vector<int> iteration, const double time,
-    const amrex::Vector<ParticleDiag>& particle_diags, int nlev,
-    const std::string prefix, int file_min_digits, bool plot_raw_fields,
-    bool plot_raw_fields_guards,
+    const amrex::Vector<ParticleDiag>& particle_diags,
+    [[maybe_unused]] int nlev,
+    const std::string prefix,
+    int file_min_digits,
+    [[maybe_unused]] bool plot_raw_fields,
+    [[maybe_unused]] bool plot_raw_fields_guards,
     const bool use_pinned_pc,
-    bool isBTD, int snapshotID,  int bufferID, int numBuffers,
+    bool isBTD,
+    int snapshotID,
+    [[maybe_unused]] int bufferID,
+    [[maybe_unused]] int numBuffers,
     const amrex::Geometry& /*full_BTD_snapshot*/,
     bool isLastBTDFlush, const amrex::Vector<int>& totalParticlesFlushedAlready) const
 {
     WARPX_PROFILE("FlushFormatPlotPlus::WriteToFile()");
-    auto & warpx = WarpX::GetInstance();
-    
+
     //const std::string& filename = amrex::Concatenate(prefix, iteration[0], file_min_digits);
     // move the name of plotfile here for classic plotfiles
     std::string plot_name = amrex::Concatenate(prefix, snapshotID, file_min_digits);
@@ -142,10 +147,10 @@ void FlushFormatPlotPlus::BTDWriter(const std::string& prefix,
 
     if ( m_Writer->InitLocalHandler(prefix) )
       {
-	AMReX_warpxBTDWriter* testWriter = new AMReX_warpxBTDWriter(warpx.getPMLdirections(),
-								    openPMD::IterationEncoding::fileBased
-								    );
-	m_Writer->SetWriter(testWriter);
+    AMReX_warpxBTDWriter* testWriter = new AMReX_warpxBTDWriter(warpx.getPMLdirections(),
+                                    openPMD::IterationEncoding::fileBased
+                                    );
+    m_Writer->SetWriter(testWriter);
       }
 
     AMReX_warpxBTDWriter* btdWriter =  (AMReX_warpxBTDWriter*) (m_Writer->m_UserHandler->m_Writer.get());
@@ -157,11 +162,11 @@ void FlushFormatPlotPlus::BTDWriter(const std::string& prefix,
 
     // write mesh
     m_Writer->StoreMesh(//parms.nlevs,
-			amrex::GetVecOfConstPtrs(mf),
-			varnames,
-			geom,
-			static_cast<Real>(time)
-			);
+            amrex::GetVecOfConstPtrs(mf),
+            varnames,
+            geom,
+            static_cast<Real>(time)
+            );
 
     // write particles
     //for (auto& part_diag : particle_diags) {
@@ -178,7 +183,7 @@ void FlushFormatPlotPlus::BTDWriter(const std::string& prefix,
 
       ParserFilter parser_filter(part_diag.m_do_parser_filter,
                                 utils::parser::compileParser<ParticleDiag::m_nvars>
-				 (part_diag.m_particle_filter_parser.get()),
+                 (part_diag.m_particle_filter_parser.get()),
                                  pc->getMass(), time);
       parser_filter.m_units = InputUnits::SI;
       GeometryFilter const geometry_filter(part_diag.m_do_geom_filter,
@@ -188,18 +193,18 @@ void FlushFormatPlotPlus::BTDWriter(const std::string& prefix,
       PinnedMemoryParticleContainer tmp;
 
       if ( use_pinned_pc )
-	{
-	  if (!pinned_pc->isDefined()) {
-	    continue; // Skip to the next particle container
-	  }
-	  tmp = pinned_pc->make_alike<amrex::PinnedArenaAllocator>();
+    {
+      if (!pinned_pc->isDefined()) {
+        continue; // Skip to the next particle container
+      }
+      tmp = pinned_pc->make_alike<amrex::PinnedArenaAllocator>();
           tmp.copyParticles(*pinned_pc, true);
           particlesConvertUnits(ConvertDirection::WarpX_to_SI, &tmp, mass);
-	}
+    }
       else
-	{
-	  particlesConvertUnits(ConvertDirection::WarpX_to_SI, pc, mass);
-	  tmp = pc->make_alike<amrex::PinnedArenaAllocator>();
+    {
+      particlesConvertUnits(ConvertDirection::WarpX_to_SI, pc, mass);
+      tmp = pc->make_alike<amrex::PinnedArenaAllocator>();
 
           using SrcData = WarpXParticleContainer::ParticleTileType::ConstParticleTileDataType;
           tmp.copyParticles(*pc,
@@ -209,44 +214,44 @@ void FlushFormatPlotPlus::BTDWriter(const std::string& prefix,
               return random_filter(p, engine) * uniform_filter(p, engine)
                      * parser_filter(p, engine) * geometry_filter(p, engine);
           }, true);
-	}
+    }
 
-	tmp.CountParticles();
+    tmp.CountParticles();
 
-	btdWriter -> AssignPtlOffset(totalParticlesFlushedAlready[whichDiag]);
+    btdWriter -> AssignPtlOffset(totalParticlesFlushedAlready[whichDiag]);
 
         Vector<std::string> real_names;
         Vector<std::string> int_names;
         Vector<int> int_flags;
         Vector<int> real_flags;
-	GetNames(part_diag, real_names, int_names, int_flags, real_flags);
+    GetNames(part_diag, real_names, int_names, int_flags, real_flags);
 
-	//m_Writer->WriteParticles(tmp, part_diag.getSpeciesName(), real_names, int_names, real_flags, int_flags,
-	m_Writer->m_UserHandler->m_Writer->DumpParticles(tmp,
-						  part_diag.getSpeciesName(),
-						  real_flags,
-						  int_flags,
-						  real_names,
-						  int_names,
-				    [=] (auto& ppc, openPMD::ParticleSpecies& currSpecies, unsigned long long localTotal)
-				    {
-				      btdWriter->SetConstantMassCharge(currSpecies, localTotal, pc->getCharge(),  pc->getMass());
-				    },
-				    [=] (auto& pti, openPMD::ParticleSpecies& currSpecies, unsigned long long offset)
-				    {
-				      btdWriter->SavePosId_RZ(pti, currSpecies, offset);
-				    });
+    //m_Writer->WriteParticles(tmp, part_diag.getSpeciesName(), real_names, int_names, real_flags, int_flags,
+    m_Writer->m_UserHandler->m_Writer->DumpParticles(tmp,
+                          part_diag.getSpeciesName(),
+                          real_flags,
+                          int_flags,
+                          real_names,
+                          int_names,
+                    [=] ([[maybe_unused]] auto& ppc, openPMD::ParticleSpecies& currSpecies, unsigned long long localTotal)
+                    {
+                      btdWriter->SetConstantMassCharge(currSpecies, localTotal, pc->getCharge(),  pc->getMass());
+                    },
+                    [=] (auto& pti, openPMD::ParticleSpecies& currSpecies, unsigned long long offset)
+                    {
+                      btdWriter->SavePosId_RZ(pti, currSpecies, offset);
+                    });
 
-	//openpmd_api::WriteParticles(tmp, part_diag.getSpeciesName(), real_names, int_names, real_flags, int_flags);
+    //openpmd_api::WriteParticles(tmp, part_diag.getSpeciesName(), real_names, int_names, real_flags, int_flags);
     }
 }
 
 void FlushFormatPlotPlus::GetNames(const ParticleDiag& part_diag,
-				   Vector<std::string>& real_names,
-				   Vector<std::string>& int_names,
-				   Vector<int>& int_flags,
-				   Vector<int>& real_flags
-				   ) const
+                   Vector<std::string>& real_names,
+                   Vector<std::string>& int_names,
+                   Vector<int>& int_flags,
+                   Vector<int>& real_flags
+                   ) const
 {
   WarpXParticleContainer* pc = part_diag.getParticleContainer();
   real_names.push_back("weight");
@@ -278,14 +283,14 @@ void FlushFormatPlotPlus::GetNames(const ParticleDiag& part_diag,
 }
 
 void FlushFormatPlotPlus::DefaultWriter(const std::string& prefix,
-					int iteration,
-					const amrex::Vector<std::string> varnames,
-					const amrex::Vector<amrex::MultiFab>& mf,
-					amrex::Vector<amrex::Geometry>& geom,
-					const double time,
-					const amrex::Vector<ParticleDiag>& particle_diags,
-					const bool use_pinned_pc
-					) const
+                    int iteration,
+                    const amrex::Vector<std::string> varnames,
+                    const amrex::Vector<amrex::MultiFab>& mf,
+                    amrex::Vector<amrex::Geometry>& geom,
+                    const double time,
+                    const amrex::Vector<ParticleDiag>& particle_diags,
+                    const bool use_pinned_pc
+                    ) const
 {
     auto & warpx = WarpX::GetInstance();
 
@@ -301,11 +306,11 @@ void FlushFormatPlotPlus::DefaultWriter(const std::string& prefix,
 
     // write mesh
     m_Writer->StoreMesh(//parms.nlevs,
-			amrex::GetVecOfConstPtrs(mf),
-			varnames,
-			geom,
-			static_cast<Real>(time)
-			);
+            amrex::GetVecOfConstPtrs(mf),
+            varnames,
+            geom,
+            static_cast<Real>(time)
+            );
     // write particles
     for (auto& part_diag : particle_diags) {
       WarpXParticleContainer* pc = part_diag.getParticleContainer();
@@ -316,7 +321,7 @@ void FlushFormatPlotPlus::DefaultWriter(const std::string& prefix,
                                          part_diag.m_uniform_stride);
       ParserFilter parser_filter(part_diag.m_do_parser_filter,
                                 utils::parser::compileParser<ParticleDiag::m_nvars>
-				 (part_diag.m_particle_filter_parser.get()),
+                 (part_diag.m_particle_filter_parser.get()),
                                  pc->getMass(), time);
       parser_filter.m_units = InputUnits::SI;
       GeometryFilter const geometry_filter(part_diag.m_do_geom_filter,
@@ -326,19 +331,19 @@ void FlushFormatPlotPlus::DefaultWriter(const std::string& prefix,
       PinnedMemoryParticleContainer tmp;
 
       if ( use_pinned_pc )
-	{
-	  if (!pinned_pc->isDefined()) {
-	    continue; // Skip to the next particle container
-	  }
-	  tmp = pinned_pc->make_alike<amrex::PinnedArenaAllocator>();
+    {
+      if (!pinned_pc->isDefined()) {
+        continue; // Skip to the next particle container
+      }
+      tmp = pinned_pc->make_alike<amrex::PinnedArenaAllocator>();
 
-	  tmp.copyParticles(*pinned_pc, true);
-	  particlesConvertUnits(ConvertDirection::WarpX_to_SI, &tmp, mass);
-	}
+      tmp.copyParticles(*pinned_pc, true);
+      particlesConvertUnits(ConvertDirection::WarpX_to_SI, &tmp, mass);
+    }
       else
-	{
-	  particlesConvertUnits(ConvertDirection::WarpX_to_SI, pc, mass);
-	  tmp = pc->make_alike<amrex::PinnedArenaAllocator>();
+    {
+      particlesConvertUnits(ConvertDirection::WarpX_to_SI, pc, mass);
+      tmp = pc->make_alike<amrex::PinnedArenaAllocator>();
 
           using SrcData = WarpXParticleContainer::ParticleTileType::ConstParticleTileDataType;
           tmp.copyParticles(*pc,
@@ -348,30 +353,30 @@ void FlushFormatPlotPlus::DefaultWriter(const std::string& prefix,
               return random_filter(p, engine) * uniform_filter(p, engine)
                      * parser_filter(p, engine) * geometry_filter(p, engine);
           }, true);
-	}
+    }
 
-	tmp.CountParticles();
+    tmp.CountParticles();
 
-	Vector<std::string> real_names;
+    Vector<std::string> real_names;
         Vector<std::string> int_names;
         Vector<int> int_flags;
         Vector<int> real_flags;
-	GetNames(part_diag, real_names, int_names, int_flags, real_flags);
-	m_Writer->m_UserHandler->m_Writer->DumpParticles(tmp,
-						  part_diag.getSpeciesName(),
-						  real_flags,
-						  int_flags,
-						  real_names,
-						  int_names,
+    GetNames(part_diag, real_names, int_names, int_flags, real_flags);
+    m_Writer->m_UserHandler->m_Writer->DumpParticles(tmp,
+                          part_diag.getSpeciesName(),
+                          real_flags,
+                          int_flags,
+                          real_names,
+                          int_names,
 
-				    [=] (auto& ppc, openPMD::ParticleSpecies& currSpecies, unsigned long long localTotal)
-				    {
-				      warpxWriter->SetConstantMassCharge(currSpecies, localTotal, pc->getCharge(),  pc->getMass());
-				    },
-				    [=] (auto& pti, openPMD::ParticleSpecies& currSpecies, unsigned long long offset)
-				    {
-				      warpxWriter->SavePosId_RZ(pti, currSpecies, offset);
-				    });
+                    [=] ([[maybe_unused]] auto& ppc, openPMD::ParticleSpecies& currSpecies, unsigned long long localTotal)
+                    {
+                      warpxWriter->SetConstantMassCharge(currSpecies, localTotal, pc->getCharge(),  pc->getMass());
+                    },
+                    [=] (auto& pti, openPMD::ParticleSpecies& currSpecies, unsigned long long offset)
+                    {
+                      warpxWriter->SavePosId_RZ(pti, currSpecies, offset);
+                    });
 
     }
 }
@@ -382,7 +387,7 @@ void FlushFormatPlotPlus::DefaultWriter(const std::string& prefix,
 AMReXWithOpenPMD::AMReXWithOpenPMD(const std::string& prefix)
   :m_Prefix(prefix)
 {
-  // warpx has multiple diags, each should maintain its own handler                                                                               
+  // warpx has multiple diags, each should maintain its own handler
   m_UserHandler = openpmd_api::InitUserHandler(prefix);
 }
 
@@ -391,7 +396,7 @@ void AMReXWithOpenPMD::SetWriter(amrex::openpmd_api::AMReX_openPMDWriter* w)
   BL_ASSERT ( m_UserHandler != nullptr );
   BL_ASSERT ( w != nullptr );
 
-  // so the openpmd filepath assigned from input file is still in use                                                                             
+  // so the openpmd filepath assigned from input file is still in use
   w->m_openPMDPrefix = m_UserHandler->m_Writer->m_openPMDPrefix;
   w->m_openPMDEncoding = m_UserHandler->m_Writer->m_openPMDEncoding;
   w->m_openPMDFileType = m_UserHandler->m_Writer->m_openPMDFileType;
@@ -432,5 +437,3 @@ void AMReXWithOpenPMD::StoreMesh (const Vector<const MultiFab*> &mf,
                      geom,
                      time);
 }
-
-
