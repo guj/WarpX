@@ -91,7 +91,7 @@ FlushFormatPlotPlus::WriteToFile (
     int snapshotID,
     [[maybe_unused]] int bufferID,
     [[maybe_unused]] int numBuffers,
-    const amrex::Geometry& /*full_BTD_snapshot*/,
+    const amrex::Geometry& full_BTD_snapshot,
     bool isLastBTDFlush, const amrex::Vector<int>& totalParticlesFlushedAlready) const
 {
     WARPX_PROFILE("FlushFormatPlotPlus::WriteToFile()");
@@ -101,20 +101,6 @@ FlushFormatPlotPlus::WriteToFile (
     std::string plot_name = amrex::Concatenate(prefix, snapshotID, file_min_digits);
     plot_name = plot_name+"/buffer";
     const std::string& filename = amrex::Concatenate(plot_name, iteration[0], file_min_digits);
-/*
-    if (!isBTD)
-    {
-      amrex::Print() << Utils::TextMsg::Info("Writing plotfile " + filename);
-    } else
-    {
-      amrex::Print() << Utils::TextMsg::Info("Writing buffer " + std::to_string(bufferID+1) + " of " + std::to_string(numBuffers)
-                        + " to snapshot " + std::to_string(snapshotID) +  " in plotfile BTD " + plot_name );
-      if (isLastBTDFlush)
-      {
-        amrex::Print() << Utils::TextMsg::Info("Finished writing snapshot " + std::to_string(snapshotID) + " in plotfile BTD " + filename);
-      }
-    }
-*/
 
     { // amrex-bp version
       WARPX_PROFILE("FlushFormatPlotPlus_OpenPMDPlotFiles()");
@@ -122,7 +108,10 @@ FlushFormatPlotPlus::WriteToFile (
       std::string opmdPrefix = prefix;
       if (isBTD)
       {
-        BTDWriter(opmdPrefix, snapshotID, varnames, mf, geom, time, particle_diags, use_pinned_pc, isLastBTDFlush, totalParticlesFlushedAlready);
+          amrex::Vector<amrex::Geometry> btd_geoms(geom.size());
+          for (auto i=0; i<geom.size(); i++)
+              btd_geoms[i] = full_BTD_snapshot;
+          BTDWriter(opmdPrefix, snapshotID, varnames, mf, btd_geoms, time, particle_diags, use_pinned_pc, isLastBTDFlush, totalParticlesFlushedAlready);
       }
       else
         DefaultWriter(opmdPrefix, iteration[0], varnames, mf, geom, time, particle_diags, use_pinned_pc);
@@ -130,7 +119,6 @@ FlushFormatPlotPlus::WriteToFile (
     } // end of amrex-bp version
 }
 
-//#ifdef FANCY_AMREX
 void FlushFormatPlotPlus::BTDWriter(const std::string& prefix,
                                     int output_iteration,
                                     const amrex::Vector<std::string> varnames,
@@ -254,7 +242,7 @@ void FlushFormatPlotPlus::GetNames(const ParticleDiag& part_diag,
                    ) const
 {
   WarpXParticleContainer* pc = part_diag.getParticleContainer();
-  real_names.push_back("weight");
+  real_names.push_back("weighting");
 
   real_names.push_back("momentum_x");
   real_names.push_back("momentum_y");
@@ -407,7 +395,6 @@ void AMReXWithOpenPMD::SetWriter(amrex::openpmd_api::AMReX_openPMDWriter* w)
 
 AMReXWithOpenPMD::~AMReXWithOpenPMD()
 {
-  amrex::Print()<<" openpmd_api::close handler "<<m_Prefix<<" \n";
   openpmd_api::CloseUserHandler(m_UserHandler);
 }
 
@@ -416,7 +403,6 @@ bool AMReXWithOpenPMD::InitLocalHandler(const std::string& prefix)
   if (m_Prefix.compare(prefix) == 0)
     return false;
 
-  amrex::Print()<<" openpmd_api::Init handler "<<m_Prefix<<" \n";
   m_Prefix = prefix;
   m_UserHandler = openpmd_api::InitUserHandler(prefix);
   return true;

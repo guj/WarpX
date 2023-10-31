@@ -116,10 +116,8 @@ void AMReX_warpxBTDWriter::Init(openPMD::Access access)
 {
   if (m_Series != nullptr) {
     m_FirstSightOfStep = ! m_Series->iterations.contains( m_CurrentStep );
-    amrex::Print()<<m_FirstSightOfStep<<" BTD Init "<<m_CurrentStep<<" \n ";
     return;
   }
-  amrex::Print()<<" BTD Init.. "<<m_CurrentStep<<" \n ";
   m_FirstSightOfStep = true;
   AMReX_openPMDWriter::Init(access);
 }
@@ -133,20 +131,21 @@ bool AMReX_warpxBTDWriter::AllocatePtlProperties(openPMD::ParticleSpecies& currS
 {
   if (np > 0)
     {
-      amrex::Print() <<"btd allocate  np="<<np<<" m_assigned = "<<m_AssignedPtlOffset<<" \n";
-      //AMReX_openPMDWriter::SetupPos(currSpecies, np + m_AssignedPtlOffset);
       return AMReX_openPMDWriter::AllocatePtlProperties(currSpecies, write_real_comp, real_comp_names,
                          write_int_comp, int_comp_names, np + GetGrandOffset());
     }
   //  np == 0
   if ( m_LastFlush && ( m_AssignedPtlOffset == 0 ) )
     {
-      amrex::Print() <<"btd last allocate  np="<<np<<" m_assigned = "<<m_AssignedPtlOffset<<" \n";
       // properties were never allocated
       //AMReX_openPMDWriter::SetupPos(currSpecies, np);
       return AMReX_openPMDWriter::AllocatePtlProperties(currSpecies, write_real_comp, real_comp_names, write_int_comp, int_comp_names, np);
     }
-  amrex::Print() <<"btd skip allocation  np="<<np<<" m_assigned = "<<m_AssignedPtlOffset<<" \n";
+
+  if (m_LastFlush) {
+      return true; // no need to do more allocation
+  }
+
   return false;
 }
 

@@ -69,7 +69,6 @@ void AMReX_warpxWriter::SetupMeshComp (openPMD::Mesh& mesh,
   amrex::Box const & global_box = full_geom.Domain();
   auto global_size = amrex::openpmd_api::helper::getReversedVec(global_box.size() );
 
-  amrex::Print()<<"  warpx::setupmeshcomp "<<varName.m_FieldName<<varName.m_CompName<<" global box="<<global_box<<std::endl;
   // - Grid spacing
   std::vector<double> const grid_spacing = amrex::openpmd_api::helper::getReversedVec(full_geom.CellSize());
   mesh.setGridSpacing(grid_spacing);
