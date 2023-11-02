@@ -582,7 +582,7 @@ FullDiagnostics::InitializeFieldFunctors (int lev)
 {
 #ifdef WARPX_DIM_RZ
     // For RZ, with openPMD, we need a special initialization instead
-    if (m_format == "openpmd") {
+    if ( (m_format == "openpmd") || (m_format == "plotplus") ) {
         InitializeFieldFunctorsRZopenPMD(lev);
         return; // We skip the rest of this function
     }
