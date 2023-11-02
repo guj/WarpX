@@ -83,7 +83,7 @@ void AMReX_warpxWriter::SetupMeshComp (openPMD::Mesh& mesh,
 
 #if defined(WARPX_DIM_RZ)
   auto & warpx = WarpX::GetInstance();
-  if (curr.m_ThetaMode) {
+  if (varName.m_ThetaMode) {
     global_size.emplace(global_size.begin(), warpx.ncomps);
   }
 #endif
@@ -260,6 +260,9 @@ AMReX_warpxWriter::SavePosId_RZ(PIt& pti,
   BL_PROFILE("amrex::openpmd_api::SavePosId( RZ ..)");
 
 #if defined(WARPX_DIM_RZ)
+  auto const numParticleOnTile = pti.numParticles();
+  uint64_t const numParticleOnTile64 = static_cast<uint64_t>( numParticleOnTile );
+
   const auto& aos = pti.GetArrayOfStructs();  // size =  numParticlesOnTile
   {
     // Save positions
