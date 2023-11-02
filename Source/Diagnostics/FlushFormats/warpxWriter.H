@@ -295,14 +295,15 @@ AMReX_warpxWriter::SavePosId_RZ(PIt& pti,
                            [](amrex::ParticleReal const *p){ delete[] p; }
                            );
       for (auto i=0; i<numParticleOnTile; i++) {
-    auto const r = aos[i].pos(0);  // {0: "r", 1: "z"}
-    x.get()[i] = r * std::cos(theta[i]);
-    y.get()[i] = r * std::sin(theta[i]);
+        auto const r = aos[i].pos(0);  // {0: "r", 1: "z"}
+        x.get()[i] = r * std::cos(theta[i]);
+        y.get()[i] = r * std::sin(theta[i]);
       }
       currSpecies["position"]["x"].storeChunk(x, {offset}, {numParticleOnTile64});
       currSpecies["position"]["y"].storeChunk(y, {offset}, {numParticleOnTile64});
     }
   }
+  SaveSpecieId(pti, currSpecies, offset);
 #else
   SavePosId(pti, currSpecies, offset);
 #endif
