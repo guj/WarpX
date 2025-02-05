@@ -661,7 +661,7 @@ for (const auto & particle_diag : particle_diags) {
     }
 
     auto hasOption=m_OpenPMDoptions.find("FlattenSteps");
-    bool flattenSteps = isBTD && (m_Series->backend() == "ADIOS2") && (hasOption != std::string::npos);
+    const bool flattenSteps = isBTD && (m_Series->backend() == "ADIOS2") && (hasOption != std::string::npos);
 
     if ( flattenSteps)
     {
