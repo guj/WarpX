@@ -1497,7 +1497,6 @@ WarpXOpenPMDPlot::WriteOpenPMDFieldsAll ( //const std::string& filename,
         amrex::Gpu::streamSynchronize();
 #endif
         // Flush data to disk after looping over all components
-        //m_Series->flush();
         flushCurrent(isBTD);
     } // levels loop (i)
 }
