@@ -825,7 +825,6 @@ WarpXOpenPMDPlot::DumpToFile (ParticleContainer* pc,
         }
     }
 
-    //m_Series->flush();
     flushCurrent(isBTD);
 }
 
