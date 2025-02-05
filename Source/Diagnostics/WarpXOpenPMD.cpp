@@ -663,7 +663,7 @@ for (const auto & particle_diag : particle_diags) {
     auto hasOption=m_OpenPMDoptions.find("FlattenSteps");
     const bool flattenSteps = isBTD && (m_Series->backend() == "ADIOS2") && (hasOption != std::string::npos);
 
-    if ( flattenSteps)
+    if (flattenSteps)
     {
        // forcing new step so data from each btd batch can be flushed out
        openPMD::Iteration currIteration = GetIteration(m_CurrentStep, isBTD);
