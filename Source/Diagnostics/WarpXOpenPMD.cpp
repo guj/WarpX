@@ -412,10 +412,12 @@ void WarpXOpenPMDPlot::flushCurrent(bool isBTD) const
      //                    ## like PDW, there will be traouble.
      // the change will be use PDW when not BTD, and Put if BTD to avoid slowing down due to  multiple writes of small data
      openPMD::Iteration currIteration = GetIteration(m_CurrentStep, isBTD);
-     if (isBTD)
+     if (isBTD) {
          currIteration.seriesFlush(  "adios2.engine.preferred_flush_target = \"buffer\"" );
-     else
+     }
+     else {
          currIteration.seriesFlush();
+     }
 }
 
 std::string
