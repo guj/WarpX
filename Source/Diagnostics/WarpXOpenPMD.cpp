@@ -391,7 +391,7 @@ WarpXOpenPMDPlot::WarpXOpenPMDPlot (
 {
     m_OpenPMDoptions = detail::getSeriesOptions(operator_type, operator_parameters,
                                                 engine_type, engine_parameters);
-    amrex::Print()<<".... openPMD options used: "<<m_OpenPMDoptions<<" \n";
+    amrex::Print() << Utils::TextMsg::Info("openPMD options used: " + m_OpenPMDoptions);
 }
 
 WarpXOpenPMDPlot::~WarpXOpenPMDPlot ()
@@ -403,14 +403,22 @@ WarpXOpenPMDPlot::~WarpXOpenPMDPlot ()
   }
 }
 
-
+/*
+ * Flushing out data of the current openPMD iteration
+ * @param [in]: isBTD    if the current diagnostic is BTD
+ *
+ * if isBTD=false, apply the default flush behaviour
+ * if isBTD=true,  advice to use ADIOS Put() instead of PDW for better performance.
+ *
+ *    iteration.seriesFlush() is used instead of series.flush()
+ *    because the latter flushes only if data is dirty
+ *    this causes trouble when the underlying writing function is collective (like PDW)
+ *
+ */
 void WarpXOpenPMDPlot::flushCurrent(bool isBTD) const
 {
      WARPX_PROFILE("WarpXOpenPMDPlot::flushCurrent");
-     // open files from all processors, in case some will not contribute below
-     // m_Series->flush(); ## NOTE flush only flushes if data is dirty. When the underlying function is collective
-     //                    ## like PDW, there will be trouble.
-     // the change will be use PDW when not BTD, and Put if BTD to avoid slowing down due to  multiple writes of small data
+
      openPMD::Iteration currIteration = GetIteration(m_CurrentStep, isBTD);
      if (isBTD) {
          currIteration.seriesFlush(  "adios2.engine.preferred_flush_target = \"buffer\"" );
