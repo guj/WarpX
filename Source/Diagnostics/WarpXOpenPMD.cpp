@@ -409,7 +409,7 @@ void WarpXOpenPMDPlot::flushCurrent(bool isBTD) const
      WARPX_PROFILE("WarpXOpenPMDPlot::flushCurrent");
      // open files from all processors, in case some will not contribute below
      // m_Series->flush(); ## NOTE flush only flushes if data is dirty. When the underlying function is collective
-     //                    ## like PDW, there will be traouble.
+     //                    ## like PDW, there will be trouble.
      // the change will be use PDW when not BTD, and Put if BTD to avoid slowing down due to  multiple writes of small data
      openPMD::Iteration currIteration = GetIteration(m_CurrentStep, isBTD);
      if (isBTD) {
