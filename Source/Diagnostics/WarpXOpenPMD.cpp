@@ -415,12 +415,14 @@ WarpXOpenPMDPlot::~WarpXOpenPMDPlot ()
  *    this causes trouble when the underlying writing function is collective (like PDW)
  *
  */
-void WarpXOpenPMDPlot::flushCurrent(bool isBTD) const
+void WarpXOpenPMDPlot::flushCurrent (bool isBTD) const
 {
      WARPX_PROFILE("WarpXOpenPMDPlot::flushCurrent");
 
      openPMD::Iteration currIteration = GetIteration(m_CurrentStep, isBTD);
      if (isBTD) {
+         // delayed until all fields and particles are registered for flush
+         // and dumped once via flattenSteps
          currIteration.seriesFlush(  "adios2.engine.preferred_flush_target = \"buffer\"" );
      }
      else {
@@ -668,12 +670,13 @@ for (const auto & particle_diag : particle_diags) {
         isBTD, isLastBTDFlush);
     }
 
-    auto hasOption=m_OpenPMDoptions.find("FlattenSteps");
+    auto hasOption = m_OpenPMDoptions.find("FlattenSteps");
     const bool flattenSteps = isBTD && (m_Series->backend() == "ADIOS2") && (hasOption != std::string::npos);
 
     if (flattenSteps)
     {
-       // forcing new step so data from each btd batch can be flushed out
+       // forcing new step so data from each btd batch in
+       // preferred_flush_target="buffer" can be flushed out
        openPMD::Iteration currIteration = GetIteration(m_CurrentStep, isBTD);
        currIteration.seriesFlush(R"(adios2.engine.preferred_flush_target = "new_step")");
     }

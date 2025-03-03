@@ -176,7 +176,7 @@ private:
     }
   }
 
-  void flushCurrent(bool isBTD) const;
+  void flushCurrent (bool isBTD) const;
 
   /** This function does initial setup for the fields when interation is newly created
    *  @param[in] meshes   The meshes in a series
