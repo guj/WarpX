@@ -402,18 +402,6 @@ WarpXOpenPMDPlot::~WarpXOpenPMDPlot ()
   }
 }
 
-/*
- * Flushing out data of the current openPMD iteration
- * @param [in]: isBTD    if the current diagnostic is BTD
- *
- * if isBTD=false, apply the default flush behaviour
- * if isBTD=true,  advice to use ADIOS Put() instead of PDW for better performance.
- *
- *    iteration.seriesFlush() is used instead of series.flush()
- *    because the latter flushes only if data is dirty
- *    this causes trouble when the underlying writing function is collective (like PDW)
- *
- */
 void WarpXOpenPMDPlot::flushCurrent (bool isBTD) const
 {
      WARPX_PROFILE("WarpXOpenPMDPlot::flushCurrent");
