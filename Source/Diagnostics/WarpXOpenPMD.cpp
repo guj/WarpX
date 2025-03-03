@@ -391,7 +391,6 @@ WarpXOpenPMDPlot::WarpXOpenPMDPlot (
 {
     m_OpenPMDoptions = detail::getSeriesOptions(operator_type, operator_parameters,
                                                 engine_type, engine_parameters);
-    amrex::Print() << Utils::TextMsg::Info("openPMD options used: " + m_OpenPMDoptions);
 }
 
 WarpXOpenPMDPlot::~WarpXOpenPMDPlot ()
